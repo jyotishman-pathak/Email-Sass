@@ -2,7 +2,8 @@ import { exchangeCodeForAccessToken, getAccountDetails } from "@/lib/aurinko/aur
 import { prisma } from "@/lib/db/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
-
+import { waitUntil } from "@vercel/functions"
+import axios from "axios"
 export const GET = async (req: NextRequest) => {
 
 
@@ -37,6 +38,18 @@ await prisma.account.upsert({
     }
   });
 
+  waitUntil(
+
+    axios.post(`${process.env.NEXT_PUBLIC_URL}/api/initial-sync`, { accountId: token.accountId.toString(), userId }).then((res) => {
+        console.log(res.data)
+    }).catch((err) => {
+        console.log(err.response.data)
+    })
+)
+
+  
+   
+   
 
     return NextResponse.redirect(new URL("/mail", req.url))
 
